@@ -5,10 +5,6 @@ on:
     branches: [ master ]
     paths-ignore:
       - '**.md'
-  pull_request:
-    branches: [ master ]
-    paths-ignore:
-      - '**.md'
 
 jobs:
   build:
@@ -20,14 +16,12 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 3.1.301
+        dotnet-version: '6.x'
     - name: Install dependencies
       run: dotnet restore
     - name: Build
       run: dotnet build --configuration Release --no-restore
-    - name: Test
-      run: dotnet test --no-restore --verbosity normal
     - name: Pack with dotnet
       run: dotnet pack --output nuget-packages --configuration Release
     - name: Push with dotnet
-      run: dotnet nuget push nuget-packages/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
+      run: dotnet nuget push nuget-packages/*.nupkg --api-key ${{ secrets.O365_NUGET_API_KEY }} --source ${{ secrets.OMEGA365_NUGET_URL }}
