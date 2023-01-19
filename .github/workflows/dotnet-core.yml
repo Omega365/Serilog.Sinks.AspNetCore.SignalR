@@ -23,6 +23,6 @@ jobs:
     - name: Pack with dotnet
       run: dotnet pack --output nuget-packages --configuration Release
     - name: Add publish source
-      run: dotnet nuget add source ${{ secrets.OMEGA365_NUGET_URL }} -n Omega365 -u unused -p ${{ secrets.O365_NUGET_API_KEY }}
+      run: dotnet nuget add source ${{ secrets.OMEGA365_NUGET_URL }} -n Omega365 -u unused -p ${{ secrets.O365_NUGET_API_KEY }} --store-password-in-clear-text
     - name: Push with dotnet 
       run: dotnet nuget push nuget-packages/*.nupkg -s Omega365 -k az
