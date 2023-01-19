@@ -16,7 +16,7 @@ namespace Serilog.Sinks.AspNetCore.SignalR
     /// </summary>
     /// <typeparam name="THub">The type of the SignalR Hub.</typeparam>
     /// <typeparam name="T">The type of the SignalR typed interface.</typeparam>
-    public class SignalRSink <THub, T> : ILogEventSink where THub : Hub<T> where T : class, IHub
+    public class SignalRSink<THub, T> : ILogEventSink where THub : Hub<T> where T : class, IHub
     {
         private readonly IFormatProvider _formatProvider;
         private readonly IServiceProvider _serviceProvider;
@@ -45,10 +45,9 @@ namespace Serilog.Sinks.AspNetCore.SignalR
             _formatProvider = formatProvider;
             _sendAsString = sendAsString;
             _serviceProvider = serviceProvider;
-            _groups = groups ?? new string[]{};
-            _userIds = userIds ?? new string[]{};
-            _excludedConnectionIds = excludedConnectionIds ?? new string[]{};
-
+            _groups = groups ?? new string[] { };
+            _userIds = userIds ?? new string[] { };
+            _excludedConnectionIds = excludedConnectionIds ?? new string[] { };
         }
 
         /// <summary>
@@ -57,14 +56,16 @@ namespace Serilog.Sinks.AspNetCore.SignalR
         /// <param name="logEvent">The event to emit</param>
         public void Emit(LogEvent logEvent)
         {
-
             if (logEvent == null)
             {
                 throw new ArgumentNullException(nameof(logEvent));
             }
-            if(_hubContext == null) {
+
+            if (_hubContext == null)
+            {
                 _hubContext = _serviceProvider.GetRequiredService<IHubContext<THub, T>>();
             }
+
             var targets = new List<T>();
 
             if (_groups.Any())
@@ -103,22 +104,28 @@ namespace Serilog.Sinks.AspNetCore.SignalR
                 {
                     target.SendLogAsString($"{logEvent.Timestamp:dd.MM.yyyy HH:mm:ss.fff} " +
                                            $"{logEvent.Level.ToString()} " +
-                                           $"{logEvent.RenderMessage(_formatProvider)} "+
+                                           $"{logEvent.RenderMessage(_formatProvider)} " +
                                            $"{logEvent.Exception?.ToString() ?? "-"} ");
                 }
                 else
                 {
-                    var id = Guid.NewGuid().ToString();
-                    var timestamp = logEvent.Timestamp.ToString("dd.MM.yyyy HH:mm:ss.fff");
-                    var level = logEvent.Level.ToString();
-                    var message = logEvent.RenderMessage(_formatProvider);
-                    var exception = logEvent.Exception?.ToString() ?? "-";
-                    target.SendLogAsObject(new { id, timestamp, level, message, exception});
+                    Dictionary<string, object> logObj = new ()
+                    {
+                        ["ID"] = Guid.NewGuid().ToString(),
+                        ["TimeStamp"] = logEvent.Timestamp.ToString("dd.MM.yyyy HH:mm:ss.fff"),
+                        ["Level"] = logEvent.Level.ToString(),
+                        ["Message"] = logEvent.RenderMessage(_formatProvider)
+                    };
+                    if (logEvent.Exception != null) logObj["Exception"] = logEvent.Exception.ToString();
+
+                    foreach (var logProp in logEvent.Properties)
+                    {
+                        logObj[logProp.Key] = logProp.Value is ScalarValue scalarValue ? scalarValue.Value : logProp.Value;
+                    }
+
+                    target.SendLogAsObject(logObj);
                 }
             }
-
-
-
         }
     }
 }
