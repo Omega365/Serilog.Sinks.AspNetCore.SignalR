@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <PackageVersion>0.4.0-1</PackageVersion>
         <PackageId>Serilog.Sinks.AspNetCore.SignalR</PackageId>
         <Title>Serilog.Sinks.AspNetCore.SignalR</Title>
@@ -14,7 +14,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Serilog.AspNetCore" Version="6.0.1"/>
+        <PackageReference Include="Serilog.AspNetCore" Version="8.0.1"/>
     </ItemGroup>
 
 </Project>
